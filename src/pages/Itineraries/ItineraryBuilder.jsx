@@ -58,7 +58,10 @@ export default function ItineraryBuilder() {
     if (data) {
       reset({
         ...data.itinerary,
-        days: data.days.length > 0 ? data.days : [
+        days: data.days.length > 0 ? data.days.map(d => ({
+          ...d,
+          hotel: d.hotel?._id || d.hotel || '',
+        })) : [
           { dayNumber: 1, title: 'Arrival', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: true, lunch: false, dinner: false }, notes: '' }
         ]
       });
@@ -76,10 +79,16 @@ export default function ItineraryBuilder() {
   const onSubmit = (formData) => {
     const submissionData = {
       ...formData,
-      days: formData.days.map((day, index) => ({
-        ...day,
-        dayNumber: index + 1
-      }))
+      days: formData.days.map((day, index) => {
+        const cleanedDay = {
+          ...day,
+          dayNumber: index + 1
+        };
+        if (!cleanedDay.hotel || cleanedDay.hotel === '') {
+          delete cleanedDay.hotel;
+        }
+        return cleanedDay;
+      })
     };
     mutation.mutate(submissionData);
   };
@@ -119,10 +128,16 @@ export default function ItineraryBuilder() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Destination <span className="text-red-500">*</span></label>
-              <select {...register('destination', { required: true })} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                <option value="">Select Destination</option>
-                {destinations?.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
-              </select>
+              <input 
+                type="text" 
+                list="destinations-list" 
+                {...register('destination', { required: true })} 
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
+                placeholder="Select or type destination..." 
+              />
+              <datalist id="destinations-list">
+                {destinations?.map(d => <option key={d._id} value={d.name} />)}
+              </datalist>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Status</label>
@@ -203,7 +218,7 @@ export default function ItineraryBuilder() {
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                       >
                         <option value="">Select Hotel (or leave for custom)</option>
-                        {hotels?.map(h => <option key={h._id} value={h.name}>{h.name} ({h.rating})</option>)}
+                        {hotels?.map(h => <option key={h._id} value={h._id}>{h.name} ({h.rating})</option>)}
                       </select>
                       <input 
                         type="text" 

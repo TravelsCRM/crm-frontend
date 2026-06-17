@@ -68,7 +68,19 @@ export default function QuotationBuilder() {
   });
 
   const onSubmit = (data) => {
-    mutation.mutate(data);
+    const cleanedData = {
+      ...data,
+      pricingBreakdown: {
+        hotelCost: Number(data.pricingBreakdown?.hotelCost) || 0,
+        transferCost: Number(data.pricingBreakdown?.transferCost) || 0,
+        activityCost: Number(data.pricingBreakdown?.activityCost) || 0,
+        otherCost: Number(data.pricingBreakdown?.otherCost) || 0,
+      },
+      markup: Number(data.markup) || 0,
+      discount: Number(data.discount) || 0,
+      gstPercentage: Number(data.gstPercentage) || 0,
+    };
+    mutation.mutate(cleanedData);
   };
 
   if (queryLoading || itineraryLoading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin h-8 w-8 text-primary-600" /></div>;

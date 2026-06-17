@@ -78,7 +78,7 @@ export default function CorporateList() {
                     {corp.city || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase font-mono">
-                    {corp.gst || 'N/A'}
+                    {corp.gstNumber || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button className="text-gray-400 hover:text-gray-500">

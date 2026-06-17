@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { getClientById, updateClient } from '../../services/clientService';
+import { getCorporateById, updateCorporate } from '../../services/corporateService';
 import { getQueries } from '../../services/queryService';
 import { getBookings } from '../../services/bookingService';
 import { getPayments } from '../../services/paymentService';
@@ -15,12 +15,12 @@ import {
   FileText, 
   Clock, 
   CreditCard,
-  User,
+  Building,
   Loader2,
   Edit,
   Eye,
   Plus,
-  TrendingUp,
+  User,
   AlertCircle,
   X
 } from 'lucide-react';
@@ -51,7 +51,7 @@ const paymentStatusColors = {
   'Cancelled': 'bg-red-100 text-red-800',
 };
 
-export default function ClientDetails() {
+export default function CorporateDetails() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('Overview');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -59,52 +59,51 @@ export default function ClientDetails() {
   const queryClient = useQueryClient();
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  // Fetch Client Details
-  const { data: client, isLoading: clientLoading, error: clientError } = useQuery({
-    queryKey: ['client', id],
-    queryFn: () => getClientById(id),
+  // Fetch Corporate Details
+  const { data: corporate, isLoading: corporateLoading, error: corporateError } = useQuery({
+    queryKey: ['corporate', id],
+    queryFn: () => getCorporateById(id),
   });
 
-  // Fetch Client Queries
+  // Fetch Corporate Queries
   const { data: queries, isLoading: queriesLoading } = useQuery({
-    queryKey: ['queries', { client: id }],
-    queryFn: () => getQueries({ client: id }),
+    queryKey: ['queries', { corporate: id }],
+    queryFn: () => getQueries({ corporate: id }),
   });
 
-  // Fetch Client Bookings
+  // Fetch Corporate Bookings
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
-    queryKey: ['bookings', { client: id }],
-    queryFn: () => getBookings({ client: id }),
+    queryKey: ['bookings', { corporate: id }],
+    queryFn: () => getBookings({ corporate: id }),
   });
 
-  // Fetch Client Payments
+  // Fetch Corporate Payments
   const { data: payments, isLoading: paymentsLoading } = useQuery({
     queryKey: ['payments', { customer: id }],
     queryFn: () => getPayments({ customer: id }),
   });
 
-  // Populate/Reset form fields on client load or modal open
+  // Populate/Reset form fields on corporate load or modal open
   useEffect(() => {
-    if (client) {
+    if (corporate) {
       reset({
-        name: client.name || '',
-        mobile: client.mobile || '',
-        alternateMobile: client.alternateMobile || '',
-        email: client.email || '',
-        city: client.city || '',
-        address: client.address || '',
-        dob: client.dob ? new Date(client.dob).toISOString().split('T')[0] : '',
-        anniversary: client.anniversary ? new Date(client.anniversary).toISOString().split('T')[0] : '',
-        notes: client.notes || ''
+        companyName: corporate.companyName || '',
+        contactPerson: corporate.contactPerson || '',
+        mobile: corporate.mobile || '',
+        email: corporate.email || '',
+        city: corporate.city || '',
+        address: corporate.address || '',
+        gstNumber: corporate.gstNumber || '',
+        notes: corporate.notes || ''
       });
     }
-  }, [client, reset, isEditModalOpen]);
+  }, [corporate, reset, isEditModalOpen]);
 
   const updateMutation = useMutation({
-    mutationFn: (data) => updateClient(id, data),
+    mutationFn: (data) => updateCorporate(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['client', id] });
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['corporate', id] });
+      queryClient.invalidateQueries({ queryKey: ['corporates'] });
       setIsEditModalOpen(false);
     }
   });
@@ -113,7 +112,7 @@ export default function ClientDetails() {
     updateMutation.mutate(data);
   };
 
-  const isLoading = clientLoading || queriesLoading || bookingsLoading || paymentsLoading;
+  const isLoading = corporateLoading || queriesLoading || bookingsLoading || paymentsLoading;
 
   if (isLoading) {
     return (
@@ -123,11 +122,11 @@ export default function ClientDetails() {
     );
   }
 
-  if (clientError) {
+  if (corporateError) {
     return (
       <div className="text-red-600 p-8 font-medium text-center bg-red-50 border border-red-200 rounded-lg max-w-xl mx-auto my-12">
         <AlertCircle className="h-10 w-10 mx-auto mb-3 text-red-500" />
-        Error: {clientError.message}
+        Error: {corporateError.message}
       </div>
     );
   }
@@ -156,14 +155,14 @@ export default function ClientDetails() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <Link to="/clients" className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100">
+          <Link to="/corporates" className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100">
             <ArrowLeft className="h-6 w-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{client.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{corporate.companyName}</h1>
             <p className="text-sm text-gray-500 flex items-center mt-1">
-              <span className="bg-primary-100 text-primary-700 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase mr-2">Direct Client</span>
-              Registered on {new Date(client.createdAt).toLocaleDateString()}
+              <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase mr-2">Corporate</span>
+              Registered on {new Date(corporate.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -181,40 +180,31 @@ export default function ClientDetails() {
         <div className="space-y-6">
           <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
             <div className="p-6 space-y-4">
-              <div className="flex items-center space-x-3 text-sm">
-                <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-950 font-medium">{client.mobile}</span>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Person</div>
+              <div className="text-base font-semibold text-gray-950 flex items-center">
+                <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                {corporate.contactPerson}
               </div>
-              {client.alternateMobile && (
-                <div className="flex items-center space-x-3 text-sm">
-                  <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-950 font-medium">{client.alternateMobile} (Alt)</span>
-                </div>
-              )}
+              <div className="flex items-center space-x-3 text-sm border-t pt-3 border-gray-100">
+                <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <span className="text-gray-950 font-medium">{corporate.mobile}</span>
+              </div>
               <div className="flex items-center space-x-3 text-sm">
                 <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-950 font-medium">{client.email || 'No email provided'}</span>
+                <span className="text-gray-950 font-medium">{corporate.email || 'No email provided'}</span>
               </div>
               <div className="flex items-start space-x-3 text-sm">
                 <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <span className="text-gray-950 font-medium">
-                  {client.address ? `${client.address}, ${client.city}` : client.city || 'No address provided'}
+                  {corporate.address ? `${corporate.address}, ${corporate.city}` : corporate.city || 'No address provided'}
                 </span>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Date of Birth</p>
-                <p className="text-sm font-semibold text-gray-900 mt-0.5">
-                  {client.dob ? new Date(client.dob).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Anniversary</p>
-                <p className="text-sm font-semibold text-gray-900 mt-0.5">
-                  {client.anniversary ? new Date(client.anniversary).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">GST Number</p>
+              <p className="text-sm font-semibold text-gray-900 mt-0.5 uppercase font-mono">
+                {corporate.gstNumber || 'N/A'}
+              </p>
             </div>
           </div>
 
@@ -288,7 +278,7 @@ export default function ClientDetails() {
                   <div>
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">Recent Activities</h3>
                     <div className="text-center py-10 text-gray-400 text-sm italic">
-                      No recent activities recorded for this client.
+                      No recent activities recorded for this corporate client.
                     </div>
                   </div>
                 </div>
@@ -339,7 +329,7 @@ export default function ClientDetails() {
                       ) : (
                         <tr>
                           <td colSpan="6" className="px-6 py-12 text-center text-sm text-gray-400 italic">
-                            No queries found for this client.
+                            No queries found for this corporate client.
                           </td>
                         </tr>
                       )}
@@ -402,7 +392,7 @@ export default function ClientDetails() {
                       ) : (
                         <tr>
                           <td colSpan="7" className="px-6 py-12 text-center text-sm text-gray-400 italic">
-                            No bookings found for this client.
+                            No bookings found for this corporate client.
                           </td>
                         </tr>
                       )}
@@ -455,7 +445,7 @@ export default function ClientDetails() {
                       ) : (
                         <tr>
                           <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-400 italic">
-                            No payments recorded for this client.
+                            No payments recorded for this corporate client.
                           </td>
                         </tr>
                       )}
@@ -471,7 +461,7 @@ export default function ClientDetails() {
                     <FileText className="h-8 w-8" />
                   </div>
                   <p className="italic font-medium">No documents uploaded yet.</p>
-                  <p className="text-xs text-gray-400 mt-1">Files, tickets, and hotel vouchers associated with this client's bookings will appear here.</p>
+                  <p className="text-xs text-gray-400 mt-1">Files, tickets, and hotel vouchers associated with this corporate client's bookings will appear here.</p>
                 </div>
               )}
 
@@ -486,7 +476,7 @@ export default function ClientDetails() {
           <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-              <h2 className="text-lg font-bold text-gray-900">Edit Client Profile</h2>
+              <h2 className="text-lg font-bold text-gray-900">Edit Corporate Profile</h2>
               <button 
                 onClick={() => setIsEditModalOpen(false)} 
                 className="text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-200 transition"
@@ -499,19 +489,29 @@ export default function ClientDetails() {
             <form onSubmit={handleSubmit(onEditSubmit)} className="flex-1 overflow-y-auto p-6 space-y-4">
               {updateMutation.isError && (
                 <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md font-medium">
-                  {updateMutation.error?.response?.data?.message || 'Failed to update client details.'}
+                  {updateMutation.error?.response?.data?.message || 'Failed to update corporate details.'}
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Company Name <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
-                    {...register('name', { required: 'Name is required' })} 
+                    {...register('companyName', { required: 'Company name is required' })} 
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
                   />
-                  {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
+                  {errors.companyName && <p className="mt-1 text-xs text-red-500">{errors.companyName.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Contact Person Name <span className="text-red-500">*</span></label>
+                  <input 
+                    type="text" 
+                    {...register('contactPerson', { required: 'Contact person name is required' })} 
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
+                  />
+                  {errors.contactPerson && <p className="mt-1 text-xs text-red-500">{errors.contactPerson.message}</p>}
                 </div>
 
                 <div>
@@ -525,19 +525,19 @@ export default function ClientDetails() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Alternate Mobile</label>
+                  <label className="block text-sm font-medium text-gray-700">Email Address</label>
                   <input 
-                    type="tel" 
-                    {...register('alternateMobile')} 
+                    type="email" 
+                    {...register('email')} 
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                  <label className="block text-sm font-medium text-gray-700">GST Number</label>
                   <input 
-                    type="email" 
-                    {...register('email')} 
+                    type="text" 
+                    {...register('gstNumber')} 
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
                   />
                 </div>
@@ -556,24 +556,6 @@ export default function ClientDetails() {
                   <textarea 
                     {...register('address')} 
                     rows={2} 
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                  <input 
-                    type="date" 
-                    {...register('dob')} 
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Anniversary</label>
-                  <input 
-                    type="date" 
-                    {...register('anniversary')} 
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
                   />
                 </div>

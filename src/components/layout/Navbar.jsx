@@ -1,12 +1,16 @@
 import { Bell, Search, Menu } from 'lucide-react';
 
-export default function Navbar() {
+export default function Navbar({ onMenuClick }) {
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       <div className="flex items-center flex-1">
-        <button className="text-gray-500 hover:text-gray-700 mr-4 lg:hidden">
+        <button 
+          onClick={onMenuClick}
+          className="text-gray-500 hover:text-gray-700 mr-4 lg:hidden focus:outline-none"
+        >
           <Menu className="h-6 w-6" />
         </button>
+
         <div className="max-w-md w-full relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />

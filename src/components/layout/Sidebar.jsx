@@ -10,7 +10,10 @@ import {
   Calendar,
   DollarSign,
   LogOut,
-  Hotel
+  Hotel,
+  MapPin,
+  Compass,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -25,18 +28,28 @@ const navItems = [
   { name: 'Payments', path: '/accounts/payments', icon: DollarSign },
   { name: 'Suppliers', path: '/masters/suppliers', icon: Briefcase },
   { name: 'Hotels', path: '/masters/hotels', icon: Hotel },
+  { name: 'Destinations', path: '/masters/destinations', icon: MapPin },
+  { name: 'Activities', path: '/masters/activities', icon: Compass },
   { name: 'Emails', path: '/emails', icon: Mail },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation();
   const { user, logout } = useAuth();
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+    }`}>
+      <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-primary-600">Travel CRM</h1>
+        <button 
+          onClick={() => setSidebarOpen(false)}
+          className="lg:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1">
@@ -48,6 +61,7 @@ export default function Sidebar() {
               <li key={item.name}>
                 <Link
                   to={item.path}
+                  onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-6 py-2.5 text-sm font-medium transition-colors ${
                     isActive 
                       ? 'bg-primary-50 text-primary-700 border-r-4 border-primary-600' 

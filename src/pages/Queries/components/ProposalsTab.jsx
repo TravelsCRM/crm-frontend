@@ -19,7 +19,7 @@ export default function ProposalsTab({ queryId }) {
 
   const { data: itineraries } = useQuery({
     queryKey: ['itineraries'],
-    queryFn: () => getItineraries({ status: 'Template' }),
+    queryFn: () => getItineraries(),
     enabled: showItineraryModal,
   });
 
@@ -162,43 +162,73 @@ export default function ProposalsTab({ queryId }) {
 
       {/* Select Itinerary Modal */}
       {showItineraryModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setShowShowItineraryModal(false)}></div>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+          onClick={() => setShowShowItineraryModal(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+              <h3 className="text-lg font-bold text-gray-900">Select Itinerary for Quotation</h3>
+              <button 
+                onClick={() => setShowShowItineraryModal(false)} 
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-200 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Select Itinerary for Quotation</h3>
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {itineraries?.map(it => (
-                    <Link 
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4">
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {itineraries && itineraries.filter(it => it.status !== 'Draft').length > 0 ? (
+                  itineraries.filter(it => it.status !== 'Draft').map(it => (
+                    <button 
                       key={it._id} 
-                      to={`/quotations/new?queryId=${queryId}&itineraryId=${it._id}`}
-                      className="block p-3 border border-gray-200 rounded-md hover:bg-primary-50 hover:border-primary-200 transition-colors"
+                      onClick={() => {
+                        setShowShowItineraryModal(false);
+                        navigate(`/quotations/new?queryId=${queryId}&itineraryId=${it._id}`);
+                      }}
+                      className="w-full text-left block p-3 border border-gray-200 rounded-md hover:bg-primary-50 hover:border-primary-200 transition-colors"
                     >
-                      <p className="text-sm font-bold text-gray-900">{it.name}</p>
-                      <p className="text-xs text-gray-500">{it.destination}</p>
-                    </Link>
-                  ))}
-                  <Link 
-                    to={`/itineraries/new?queryId=${queryId}`}
-                    className="block p-3 border-2 border-dashed border-gray-300 rounded-md text-center text-primary-600 hover:text-primary-700 hover:border-primary-400 transition-colors font-medium text-sm"
-                  >
-                    + Create New Custom Itinerary
-                  </Link>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-bold text-gray-900">{it.name}</p>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          it.status === 'Template' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'
+                        }`}>
+                          {it.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{it.destination}</p>
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 italic text-center py-4">No active itineraries found. Please create a custom itinerary below.</p>
+                )}
                 <button 
-                  type="button" 
-                  onClick={() => setShowShowItineraryModal(false)}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => {
+                    setShowShowItineraryModal(false);
+                    navigate(`/itineraries/new?queryId=${queryId}`);
+                  }}
+                  className="w-full block p-3 border-2 border-dashed border-gray-300 rounded-md text-center text-primary-600 hover:text-primary-700 hover:border-primary-400 transition-colors font-medium text-sm"
                 >
-                  Cancel
+                  + Create New Custom Itinerary
                 </button>
               </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <button 
+                type="button" 
+                onClick={() => setShowShowItineraryModal(false)}
+                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
