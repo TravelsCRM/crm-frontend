@@ -32,6 +32,8 @@ import BookingList from './pages/Bookings/BookingList';
 import BookingDetails from './pages/Bookings/BookingDetails';
 import PaymentList from './pages/Accounts/PaymentList';
 import SettingsPage from './pages/Settings/SettingsPage';
+import EmailPage from './pages/Emails/EmailPage';
+
 
 
 function App() {
@@ -76,6 +78,8 @@ function App() {
             <Route path="activities/new" element={<CreateActivity />} />
           </Route>
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="emails" element={<EmailPage />} />
+
 
         </Route>
       </Route>
