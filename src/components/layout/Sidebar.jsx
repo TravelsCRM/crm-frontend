@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -10,26 +11,38 @@ import {
   Calendar,
   DollarSign,
   LogOut,
-  Hotel,
-  MapPin,
   Compass,
-  X
+  X,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'Queries', path: '/queries', icon: FileText },
-  { name: 'Clients', path: '/clients', icon: Users },
-  { name: 'Agents', path: '/agents', icon: Briefcase },
-  { name: 'Corporates', path: '/corporates', icon: Briefcase },
+  { 
+    name: 'Customers', 
+    icon: Users,
+    children: [
+      { name: 'Clients', path: '/clients' },
+      { name: 'Agents', path: '/agents' },
+      { name: 'Corporates', path: '/corporates' },
+    ]
+  },
   { name: 'Itineraries', path: '/itineraries', icon: Map },
   { name: 'Bookings', path: '/bookings', icon: Calendar },
   { name: 'Payments', path: '/accounts/payments', icon: DollarSign },
-  { name: 'Suppliers', path: '/masters/suppliers', icon: Briefcase },
-  { name: 'Hotels', path: '/masters/hotels', icon: Hotel },
-  { name: 'Destinations', path: '/masters/destinations', icon: MapPin },
-  { name: 'Activities', path: '/masters/activities', icon: Compass },
+  { 
+    name: 'Masters', 
+    icon: Compass,
+    children: [
+      { name: 'Suppliers', path: '/masters/suppliers' },
+      { name: 'Hotels', path: '/masters/hotels' },
+      { name: 'Destinations', path: '/masters/destinations' },
+      { name: 'Activities', path: '/masters/activities' },
+    ]
+  },
   { name: 'Emails', path: '/emails', icon: Mail },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
@@ -37,6 +50,29 @@ const navItems = [
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [openDropdowns, setOpenDropdowns] = useState({});
+
+  // Auto-expand dropdown if any child route is active
+  useEffect(() => {
+    const activeDropdown = navItems.find(item => 
+      item.children && item.children.some(child => 
+        location.pathname === child.path || (child.path !== '/' && location.pathname.startsWith(child.path))
+      )
+    );
+    if (activeDropdown) {
+      setOpenDropdowns(prev => ({
+        ...prev,
+        [activeDropdown.name]: true
+      }));
+    }
+  }, [location.pathname]);
+
+  const toggleDropdown = (name) => {
+    setOpenDropdowns(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
 
   return (
     <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
@@ -55,20 +91,81 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <ul className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
             
+            // Check if standard nav item is active
+            const isStandardActive = !item.children && (
+              location.pathname === item.path || 
+              (item.path !== '/' && location.pathname.startsWith(item.path))
+            );
+
+            // Check if any child route of this dropdown is active
+            const isParentActive = item.children && item.children.some(child => 
+              location.pathname === child.path || 
+              (child.path !== '/' && location.pathname.startsWith(child.path))
+            );
+
+            const isDropdownOpen = !!openDropdowns[item.name];
+
+            if (item.children) {
+              return (
+                <li key={item.name} className="space-y-1">
+                  <button
+                    onClick={() => toggleDropdown(item.name)}
+                    className={`w-full flex items-center justify-between px-6 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+                      isParentActive 
+                        ? 'text-primary-700 font-semibold' 
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <Icon className={`h-5 w-5 mr-3 ${isParentActive ? 'text-primary-600' : 'text-gray-400'}`} />
+                      <span>{item.name}</span>
+                    </div>
+                    {isDropdownOpen ? (
+                      <ChevronDown className={`h-4 w-4 ${isParentActive ? 'text-primary-600' : 'text-gray-400'}`} />
+                    ) : (
+                      <ChevronRight className={`h-4 w-4 ${isParentActive ? 'text-primary-600' : 'text-gray-400'}`} />
+                    )}
+                  </button>
+                  {isDropdownOpen && (
+                    <ul className="pl-4 border-l border-gray-200 ml-8 space-y-1 py-0.5">
+                      {item.children.map((child) => {
+                        const isChildActive = location.pathname === child.path || 
+                          (child.path !== '/' && location.pathname.startsWith(child.path));
+                        return (
+                          <li key={child.name}>
+                            <Link
+                              to={child.path}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`block py-1.5 px-3 text-sm rounded-md transition-all ${
+                                isChildActive
+                                  ? 'bg-primary-50 text-primary-700 font-semibold'
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              }`}
+                            >
+                              {child.name}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            }
+
             return (
               <li key={item.name}>
                 <Link
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-6 py-2.5 text-sm font-medium transition-colors ${
-                    isActive 
+                    isStandardActive 
                       ? 'bg-primary-50 text-primary-700 border-r-4 border-primary-600' 
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className={`h-5 w-5 mr-3 ${isActive ? 'text-primary-600' : 'text-gray-400'}`} />
+                  <Icon className={`h-5 w-5 mr-3 ${isStandardActive ? 'text-primary-600' : 'text-gray-400'}`} />
                   {item.name}
                 </Link>
               </li>
