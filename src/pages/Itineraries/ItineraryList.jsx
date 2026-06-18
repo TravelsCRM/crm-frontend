@@ -75,7 +75,9 @@ export default function ItineraryList() {
               {itineraries?.map((itinerary) => (
                 <tr key={itinerary._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{itinerary.name}</div>
+                    <Link to={`/itineraries/${itinerary._id}`} className="text-sm font-semibold text-primary-600 hover:text-primary-700">
+                      {itinerary.name}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {itinerary.destination}

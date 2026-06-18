@@ -37,3 +37,8 @@ export const exportQueries = async () => {
   link.click();
   link.remove();
 };
+
+export const deleteQuery = async (id) => {
+  const { data } = await api.delete(`/queries/${id}`);
+  return data;
+};

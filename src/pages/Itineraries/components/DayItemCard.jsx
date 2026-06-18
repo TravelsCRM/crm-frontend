@@ -1,7 +1,41 @@
-import React from 'react';
-import { GripVertical, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { GripVertical, Trash2, Upload, Loader2, X } from 'lucide-react';
+import { uploadImage } from '../../../services/uploadService';
 
-export default function DayItemCard({ index, register, remove, hotels, allActivities }) {
+export default function DayItemCard({ index, register, setValue, watch, remove, hotels, allActivities }) {
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Watch the image field value
+  const imageUrl = watch(`days.${index}.image`);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const res = await uploadImage(file);
+      setValue(`days.${index}.image`, res.url);
+    } catch (err) {
+      alert('Upload failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setValue(`days.${index}.image`, '');
+  };
+
+  // Helper to format local asset URLs dynamically based on current host
+  const getBackendUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
+    const host = apiBase.replace(/\/api$/, '');
+    return `${host}${path}`;
+  };
+
   return (
     <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
       <div className="px-6 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -33,6 +67,57 @@ export default function DayItemCard({ index, register, remove, hotels, allActivi
             placeholder="What happens on this day?"
           />
         </div>
+        
+        {/* Day Image Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2 text-[11px] uppercase font-bold tracking-wider">Day Photo / Image</label>
+          <input type="hidden" {...register(`days.${index}.image`)} />
+          
+          {imageUrl ? (
+            <div className="relative w-full max-w-sm rounded-lg border border-gray-200 overflow-hidden bg-gray-50 group">
+              <img 
+                src={getBackendUrl(imageUrl)} 
+                alt={`Day ${index + 1}`} 
+                className="w-full h-48 object-cover"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition shadow-md focus:outline-none"
+                title="Remove Photo"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <label className="flex flex-col items-center justify-center w-40 h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-400 hover:bg-gray-50 transition">
+                {isUploading ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="h-6 w-6 text-primary-500 animate-spin" />
+                    <span className="text-[10px] text-gray-500 mt-1 font-medium">Uploading...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-6 w-6 text-gray-400" />
+                    <span className="text-[10px] text-gray-500 mt-1 font-semibold">Upload Photo</span>
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                  disabled={isUploading}
+                  className="hidden" 
+                />
+              </label>
+              <div className="text-xs text-gray-400">
+                Supports JPG, PNG, WEBP. Max size 5MB.
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 text-[11px] uppercase font-bold tracking-wider">Accommodation</label>

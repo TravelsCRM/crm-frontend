@@ -75,14 +75,14 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   };
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col h-screen transform transition-transform duration-300 ease-in-out ${
       sidebarOpen ? 'translate-x-0' : '-translate-x-full'
     }`}>
       <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
         <h1 className="text-xl font-bold text-primary-600">Travel CRM</h1>
         <button 
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
+          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none"
         >
           <X className="h-5 w-5" />
         </button>

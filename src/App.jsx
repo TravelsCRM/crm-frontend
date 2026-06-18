@@ -6,6 +6,7 @@ import CreateQuery from './pages/Queries/CreateQuery';
 import QueryDetails from './pages/Queries/QueryDetails';
 import ItineraryList from './pages/Itineraries/ItineraryList';
 import ItineraryBuilder from './pages/Itineraries/ItineraryBuilder';
+import ItineraryDetails from './pages/Itineraries/ItineraryDetails';
 import QuotationBuilder from './pages/Quotations/QuotationBuilder';
 import Login from './pages/Auth/Login';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -48,6 +49,7 @@ function App() {
           <Route path="queries/:id" element={<QueryDetails />} />
           <Route path="itineraries" element={<ItineraryList />} />
           <Route path="itineraries/new" element={<ItineraryBuilder />} />
+          <Route path="itineraries/:id" element={<ItineraryDetails />} />
           <Route path="itineraries/:id/edit" element={<ItineraryBuilder />} />
           <Route path="quotations/new" element={<QuotationBuilder />} />
           

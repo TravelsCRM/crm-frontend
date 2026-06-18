@@ -18,14 +18,14 @@ export default function ItineraryBuilder() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { register, control, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
       destination: '',
       status: 'Draft',
       pax: { adults: 2, children: 0, infants: 0 },
       days: [
-        { dayNumber: 1, title: 'Arrival', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: true, lunch: false, dinner: false }, notes: '' }
+        { dayNumber: 1, title: 'Arrival', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: true, lunch: false, dinner: false }, notes: '', image: '' }
       ]
     }
   });
@@ -65,8 +65,9 @@ export default function ItineraryBuilder() {
         days: itineraryData.days.length > 0 ? itineraryData.days.map(d => ({
           ...d,
           hotel: d.hotel?._id || d.hotel || '',
+          image: d.image || '',
         })) : [
-          { dayNumber: 1, title: 'Arrival', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: true, lunch: false, dinner: false }, notes: '' }
+          { dayNumber: 1, title: 'Arrival', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: true, lunch: false, dinner: false }, notes: '', image: '' }
         ]
       });
     }
@@ -134,7 +135,7 @@ export default function ItineraryBuilder() {
             <h2 className="text-xl font-bold text-gray-900">Day-wise Itinerary</h2>
             <button 
               type="button"
-              onClick={() => append({ dayNumber: fields.length + 1, title: '', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: false, lunch: false, dinner: false }, notes: '' })}
+              onClick={() => append({ dayNumber: fields.length + 1, title: '', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: false, lunch: false, dinner: false }, notes: '', image: '' })}
               className="inline-flex items-center px-3 py-1.5 border border-primary-600 text-sm font-semibold rounded-lg text-primary-600 bg-white hover:bg-primary-50 transition"
             >
               <Plus className="h-4 w-4 mr-1.5" />
@@ -148,6 +149,8 @@ export default function ItineraryBuilder() {
                 key={field.id}
                 index={index}
                 register={register}
+                setValue={setValue}
+                watch={watch}
                 remove={remove}
                 hotels={hotels}
                 allActivities={allActivities}
@@ -157,7 +160,7 @@ export default function ItineraryBuilder() {
 
           <button 
             type="button"
-            onClick={() => append({ dayNumber: fields.length + 1, title: '', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: false, lunch: false, dinner: false }, notes: '' })}
+            onClick={() => append({ dayNumber: fields.length + 1, title: '', description: '', hotel: '', transfers: '', activities: '', meals: { breakfast: false, lunch: false, dinner: false }, notes: '', image: '' })}
             className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-primary-600 hover:border-primary-400 flex flex-col items-center justify-center transition"
           >
             <Plus className="h-8 w-8 mb-1" />
